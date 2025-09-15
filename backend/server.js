@@ -28,7 +28,8 @@ app.get('/', (req, res) => {
 });
 
 // Example route placeholder
-app.use('/api/users', require('./routes/userRoutes')); // (you can create routes later)
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
