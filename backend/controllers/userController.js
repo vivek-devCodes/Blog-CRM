@@ -1,5 +1,51 @@
 const userService = require("../services/userService");
 
+// Login user
+exports.loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await userService.loginUser(email, password);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to login",
+      data: null,
+    });
+  }
+};
+
+// Check if email exists
+exports.checkEmail = async (req, res) => {
+  try {
+    const user = await userService.findUserByEmail(req.body.email);
+    if (user) {
+      return res.status(200).json({
+        exists: true,
+      });
+    }
+    return res.status(200).json({
+      exists: false,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to check email",
+      data: null,
+    });
+  }
+};
+
 // Create user
 exports.createUser = async (req, res) => {
   try {
