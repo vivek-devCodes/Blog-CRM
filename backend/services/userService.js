@@ -1,5 +1,30 @@
 const userRepository = require("../repositories/userRepository");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const { sendPasswordResetEmail } = require("../config/email");
+
+exports.forgotPassword = async (email) => {
+  const user = await userRepository.findUserByEmail(email);
+  if (!user) {
+    return null;
+  }
+
+  // Generate reset token
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  user.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+  await user.save();
+
+  // Send email
+  const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+  await sendPasswordResetEmail(user.email, resetUrl);
+
+  return user;
+};
 
 exports.loginUser = async (email, password) => {
   const user = await userRepository.findUserByEmail(email);

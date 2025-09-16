@@ -1,5 +1,29 @@
 const userService = require("../services/userService");
 
+// Forgot password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await userService.forgotPassword(email);
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Password reset email sent",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to send password reset email",
+      data: null,
+    });
+  }
+};
+
 // Login user
 exports.loginUser = async (req, res) => {
   try {
