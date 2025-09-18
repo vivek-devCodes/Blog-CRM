@@ -1,7 +1,7 @@
 const userRepository = require("../repositories/userRepository");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const { sendPasswordResetEmail } = require("../config/email");
+const { sendPasswordResetEmail, sendWelcomeEmail } = require("../config/email");
 
 exports.forgotPassword = async (email) => {
   const user = await userRepository.findUserByEmail(email);
@@ -45,7 +45,21 @@ exports.findUserByEmail = (email) => {
 exports.createUser = async (userData) => {
   const salt = await bcrypt.genSalt(10);
   userData.password = await bcrypt.hash(userData.password, salt);
-  return userRepository.createUser(userData);
+  
+  // Create the user
+  const user = await userRepository.createUser(userData);
+  
+  // Send welcome email after successful user creation
+  try {
+    await sendWelcomeEmail(user.email, user.name, user.email);
+    console.log(`Welcome email sent to ${user.email}`);
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+    // Don't throw error here to avoid breaking user creation
+    // The user is already created successfully
+  }
+  
+  return user;
 };
 
 exports.getUsers = () => {
