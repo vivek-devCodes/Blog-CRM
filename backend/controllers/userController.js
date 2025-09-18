@@ -1,4 +1,5 @@
 const userService = require("../services/userService");
+const { generateToken, generateRefreshToken } = require("../middleware/auth");
 
 // Forgot password
 exports.forgotPassword = async (req, res) => {
@@ -33,18 +34,49 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
+        isAuthenticated: false
       });
     }
+
+    // Generate JWT tokens
+    const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    // Set secure HTTP-only cookies
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // Return user data without password
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt
+    };
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      data: user,
+      data: userData,
+      isAuthenticated: true
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to login",
       data: null,
+      isAuthenticated: false
     });
   }
 };
@@ -177,6 +209,55 @@ exports.deleteUser = async (req, res) => {
       success: false,
       message: error.message || "Failed to delete user",
       data: null,
+    });
+  }
+};
+
+// Verify authentication status
+exports.verifyAuth = async (req, res) => {
+  try {
+    // This endpoint is protected by authenticateToken middleware
+    // If we reach here, the user is authenticated
+    const userData = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      createdAt: req.user.createdAt
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "User is authenticated",
+      data: userData,
+      isAuthenticated: true
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to verify authentication",
+      data: null,
+      isAuthenticated: false
+    });
+  }
+};
+
+// Logout user
+exports.logoutUser = async (req, res) => {
+  try {
+    // Clear the authentication cookies
+    res.clearCookie('authToken');
+    res.clearCookie('refreshToken');
+
+    return res.status(200).json({
+      success: true,
+      message: "Logout successful",
+      isAuthenticated: false
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to logout",
+      isAuthenticated: false
     });
   }
 };
