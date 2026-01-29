@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Reset - Your Account</title>
+  <title>Password Reset Request - CRM System</title>
   <style>
     /* Reset styles */
     body, table, td, p, a, li, blockquote {
@@ -35,7 +35,7 @@
 
     .email-container {
       max-width: 600px;
-      margin: 0 auto;
+      margin: 40px auto;
       background-color: #ffffff;
       border-radius: 12px;
       overflow: hidden;
@@ -48,21 +48,16 @@
       text-align: center;
     }
 
-    .logo {
-      width: 60px;
-      height: 60px;
+    .logo-circle {
+      width: 80px;
+      height: 80px;
       background-color: rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       margin: 0 auto 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .logo svg {
-      width: 30px;
-      height: 30px;
-      fill: white;
+      backdrop-filter: blur(10px);
     }
 
     .header h1 {
@@ -71,6 +66,12 @@
       font-weight: 700;
       margin: 0;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      margin: 10px 0 0 0;
     }
 
     .content {
@@ -82,7 +83,6 @@
       font-size: 24px;
       font-weight: 600;
       margin: 0 0 20px 0;
-      text-align: center;
     }
 
     .content p {
@@ -92,29 +92,36 @@
       margin: 0 0 20px 0;
     }
 
-    .reset-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #ffffff !important;
-      text-decoration: none;
-      padding: 16px 32px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 16px;
-      text-align: center;
-      margin: 30px 0;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-      transition: all 0.3s ease;
+    .info-box {
+      background: #f3f4f6;
+      border-left: 4px solid #667eea;
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 4px;
     }
 
-    .reset-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    .info-box p {
+      margin: 0;
+      color: #4b5563;
+      font-size: 14px;
     }
 
     .button-container {
       text-align: center;
       margin: 30px 0;
+    }
+
+    .reset-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 16px 40px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
     .security-notice {

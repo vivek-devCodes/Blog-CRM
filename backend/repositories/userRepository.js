@@ -5,6 +5,14 @@ exports.findUserByEmail = async (email) => {
   return await User.findOne({ email });
 };
 
+// Find by reset token
+exports.findUserByResetToken = async (token) => {
+  return await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+};
+
 // Create
 exports.createUser = async (userData) => {
   const user = new User(userData);

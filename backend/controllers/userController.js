@@ -25,6 +25,39 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// Reset password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Token and password are required",
+      });
+    }
+
+    const user = await userService.resetPassword(token, password);
+    
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid or expired reset token",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Failed to reset password",
+    });
+  }
+};
+
 // Login user
 exports.loginUser = async (req, res) => {
   try {
@@ -133,6 +166,81 @@ exports.getUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch users",
+      data: null,
+    });
+  }
+};
+
+// Get user statistics
+exports.getUserStats = async (req, res) => {
+  try {
+    const User = require('../models/User');
+    
+    // Overview stats
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ status: 'active' });
+    const inactiveUsers = await User.countDocuments({ status: 'inactive' });
+    const suspendedUsers = await User.countDocuments({ status: 'suspended' });
+    
+    // Role distribution
+    const roleStats = await User.aggregate([
+      {
+        $group: {
+          _id: '$role',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+    
+    // New users in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const newUsers = await User.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+    
+    // Monthly registration trend (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const monthlyStats = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+    
+    return res.status(200).json({
+      success: true,
+      data: {
+        overview: {
+          totalUsers,
+          activeUsers,
+          inactiveUsers,
+          suspendedUsers,
+          newUsers
+        },
+        roleStats,
+        monthlyStats
+      }
+    });
+  } catch (error) {
+    console.error('Get user stats error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch user statistics",
       data: null,
     });
   }

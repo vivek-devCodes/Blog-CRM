@@ -20,9 +20,32 @@ exports.forgotPassword = async (email) => {
   await user.save();
 
   // Send email
-  const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+  const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
   await sendPasswordResetEmail(user.email, resetUrl);
 
+  return user;
+};
+
+exports.resetPassword = async (token, newPassword) => {
+  // Hash the token from URL to match against database
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  // Find user with valid token and unexpired expiration
+  const user = await userRepository.findUserByResetToken(hashedToken);
+  
+  if (!user || user.resetPasswordExpires < Date.now()) {
+    return null;
+  }
+
+  // Hash new password
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(newPassword, salt);
+  
+  // Clear reset token fields
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  
+  await user.save();
   return user;
 };
 
