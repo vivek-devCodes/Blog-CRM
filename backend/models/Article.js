@@ -63,7 +63,6 @@ const articleSchema = new mongoose.Schema({
   },
   doi: {
     type: String,
-    unique: true,
     sparse: true
   },
   volume: {
@@ -120,7 +119,7 @@ const articleSchema = new mongoose.Schema({
 articleSchema.index({ title: 'text', content: 'text', abstract: 'text' });
 articleSchema.index({ category: 1, status: 1 });
 articleSchema.index({ publishedAt: -1 });
-articleSchema.index({ doi: 1 });
+articleSchema.index({ doi: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model("Article", articleSchema);
 
