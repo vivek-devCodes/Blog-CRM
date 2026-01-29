@@ -24,12 +24,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col lg:ml-64">
+      <div className="lg:ml-64">
         {/* Top header */}
         <header className="bg-white/80 backdrop-blur-lg border-b border-white/20 shadow-sm sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
